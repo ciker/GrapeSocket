@@ -7,7 +7,6 @@ using System.Net;
 using System.Net.Sockets;
 using GrapeSocket.Core;
 using GrapeSocket.Core.Buffer;
-using GrapeSocket.Core.Protocol;
 using GrapeSocket.Core.Interface;
 using GrapeSocket.Server.Interface;
 
@@ -33,9 +32,10 @@ namespace GrapeSocket.Server.Protocol
             }
         }
 
-        private SendData NoComplateCmd = null;//未完全发送指令
+        private byte[] noComplateBytes = null;//未完全发送指令
+        private int noComplateOffset = 0;
         bool isSend = false;//发送状态
-        private ConcurrentQueue<SendData> sendDataQueue = new ConcurrentQueue<SendData>();//指令发送队列
+        private ConcurrentQueue<byte[]> sendDataQueue = new ConcurrentQueue<byte[]>();//指令发送队列
         public bool ProcessReceiveBuffer(byte[] receiveBuffer, int offset, int count)
         {
             while (count > 0)
@@ -79,7 +79,7 @@ namespace GrapeSocket.Server.Protocol
             needReceivePacketLenght = 0;
         }
         object lockObj = new object();
-        public void SendAsync(SendData data)
+        public void SendAsync(byte[] data)
         {
             sendDataQueue.Enqueue(data);
             if (!isSend)
@@ -102,45 +102,46 @@ namespace GrapeSocket.Server.Protocol
         {
             while(sendDataQueue.Count > 0)
             {
-                if (NoComplateCmd != null)
+                if (noComplateBytes != null)
                 {
-                    int noComplateLength = NoComplateCmd.Data.Length - NoComplateCmd.Offset;
+                    int noComplateLength = noComplateBytes.Length - noComplateOffset;
                     if (noComplateLength <= surplus)
                     {
-                        SendBuffer.WriteBuffer(NoComplateCmd.Data, NoComplateCmd.Offset, noComplateLength);
+                        SendBuffer.WriteBuffer(noComplateBytes, noComplateOffset, noComplateLength);
                         surplus -= noComplateLength;
-                        NoComplateCmd = null;
+                        noComplateBytes = null;
+                        noComplateOffset = 0;
                     }
                     else
                     {
-                        SendBuffer.WriteBuffer(NoComplateCmd.Data, NoComplateCmd.Offset, surplus);
-                        NoComplateCmd.Offset += surplus;
+                        SendBuffer.WriteBuffer(noComplateBytes, noComplateOffset, surplus);
+                        noComplateOffset += surplus;
                         surplus -= surplus;
                         break;
                     }
                 }
                 if (surplus >= intByteLength)
                 {
-                    SendData data;
+                    byte[] data;
                     if (sendDataQueue.TryDequeue(out data))
                     {
-                        var PacketAllLength = data.Data.Length + intByteLength;
+                        var PacketAllLength = data.Length + intByteLength;
                         if (PacketAllLength <= surplus)
                         {
-                            SendBuffer.WriteInt(data.Data.Length, false); //写入总大小
-                            SendBuffer.WriteBuffer(data.Data); //写入命令内容
+                            SendBuffer.WriteInt(data.Length, false); //写入总大小
+                            SendBuffer.WriteBuffer(data); //写入命令内容
                             surplus -= PacketAllLength;
                         }
                         else
                         {
-                            SendBuffer.WriteInt(data.Data.Length, false); //写入总大小
+                            SendBuffer.WriteInt(data.Length, false); //写入总大小
                             surplus -= intByteLength; ;
                             if (surplus > 0)
                             {
-                                SendBuffer.WriteBuffer(data.Data, data.Offset, surplus); //写入命令内容
-                                data.Offset = surplus;
+                                SendBuffer.WriteBuffer(data, 0, surplus); //写入命令内容
+                                noComplateOffset = surplus;
                             }
-                            NoComplateCmd = data;//把未全部发送指令缓存
+                            noComplateBytes = data;//把未全部发送指令缓存
                             break;
                         }
                     }
@@ -180,7 +181,7 @@ namespace GrapeSocket.Server.Protocol
                 isSend = false;
                 if (sendDataQueue.Count > 0)
                 {
-                    SendData cmd;
+                    byte[] cmd;
                     if (!sendDataQueue.TryDequeue(out cmd))
                     {
                         SpinWait spinWait = new SpinWait();
@@ -192,7 +193,7 @@ namespace GrapeSocket.Server.Protocol
                 }
             }
             SendBuffer.Clear();
-            NoComplateCmd = null;
+            noComplateBytes = null;
             needReceivePacketLenght = 0;
         }
     }

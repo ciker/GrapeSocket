@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net.Sockets;
-using GrapeSocket.Core.Protocol;
 using GrapeSocket.Core.Interface;
 
 

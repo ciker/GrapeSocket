@@ -2,7 +2,6 @@
 using GrapeSocket.Core.Session;
 using System.Net.Sockets;
 using GrapeSocket.Core;
-using GrapeSocket.Core.Protocol;
 using GrapeSocket.Server.Interface;
 using GrapeSocket.Core.Interface;
 
@@ -96,8 +95,7 @@ namespace GrapeSocket.Server.Session
         /// <param name="data"></param>
         public void SendAsync(byte[] data)
         {
-            SendData sendData = new SendData() { Data = data };
-            PacketProtocol.SendAsync(sendData);
+            PacketProtocol.SendAsync(data);
         }
 
         public void StartReceiveAsync()

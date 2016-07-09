@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net.Sockets;
 using GrapeSocket.Core.Interface;
-using GrapeSocket.Core.Protocol;
 
 namespace GrapeSocket.Server.Interface
 {
@@ -15,7 +14,7 @@ namespace GrapeSocket.Server.Interface
         /// 发送指令
         /// </summary>
         /// <returns></returns>
-        void SendAsync(SendData data);
+        void SendAsync(byte[] data);
         /// <summary>
         /// 处理接收到的数据
         /// </summary>

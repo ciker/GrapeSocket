@@ -2,7 +2,6 @@
 using System.Net.Sockets;
 using GrapeSocket.Core.Session;
 using GrapeSocket.Core.Interface;
-using GrapeSocket.Core.Protocol;
 
 namespace GrapeSocket.Server.Interface
 {
