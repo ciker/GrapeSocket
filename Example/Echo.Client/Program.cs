@@ -51,7 +51,7 @@ namespace Echo.Client
            var tSource = new TaskCompletionSource<byte[]>();
             taskQueue.Enqueue(tSource);
             base.SendAsync(data);
-            var cancelSource = new CancellationTokenSource(5000);
+            var cancelSource = new CancellationTokenSource(50000);
             tSource.Task.Wait(cancelSource.Token);
             return await tSource.Task;
         }
@@ -68,7 +68,7 @@ namespace Echo.Client
     public class Program
     {
         static MyClient client;
-        static QueryClient QClient;
+        static QueryClient[] QClient=new QueryClient[10];
         static int receiveCount = 0;
         static int allCount = 100000;
         static Stopwatch sb = new Stopwatch();
@@ -79,9 +79,12 @@ namespace Echo.Client
         public static void AnswerTest()
         {
             var endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8088);
-            QClient = new QueryClient(endPoint);
-            QClient.PacketProtocol = new TcpClientPacketProtocol(1024, 1024 * 4);
-            QClient.Connect();
+            for (int i = 0; i < 10; i++)
+            {
+                QClient[i] = new QueryClient(endPoint);
+                QClient[i].PacketProtocol = new TcpClientPacketProtocol(1024, 1024 * 4);
+                QClient[i].Connect();
+            }
             Console.WriteLine("连接服务器成功");
             var data = Encoding.UTF8.GetBytes("测试数据kjfl发送大法师大法是大法师大法是否阿斯发达说");
             while (true)
@@ -95,70 +98,70 @@ namespace Echo.Client
                  {
                      for (var d = 0; d < allCount; d++)
                      {
-                         var t = await QClient.QueryAsync(data);
+                         var t = await QClient[0].QueryAsync(data);
                      }
                  });
                 var t2 = Task.Run(async () =>
                 {
                     for (var d = 0; d < allCount; d++)
                     {
-                        var t = await QClient.QueryAsync(data);
+                        var t = await QClient[1].QueryAsync(data);
                     }
                 });
                 var t3 = Task.Run(async () =>
                 {
                     for (var d = 0; d < allCount; d++)
                     {
-                        var t = await QClient.QueryAsync(data);
+                        var t = await QClient[2].QueryAsync(data);
                     }
                 });
                 var t4 = Task.Run(async () =>
                 {
                     for (var d = 0; d < allCount; d++)
                     {
-                        var t = await QClient.QueryAsync(data);
+                        var t = await QClient[3].QueryAsync(data);
                     }
                 });
                 var t5 = Task.Run(async () =>
                 {
                     for (var d = 0; d < allCount; d++)
                     {
-                        var t = await QClient.QueryAsync(data);
+                        var t = await QClient[4].QueryAsync(data);
                     }
                 });
                 var t6 = Task.Run(async () =>
                 {
                     for (var d = 0; d < allCount; d++)
                     {
-                        var t = await QClient.QueryAsync(data);
+                        var t = await QClient[5].QueryAsync(data);
                     }
                 });
                 var t7 = Task.Run(async () =>
                 {
                     for (var d = 0; d < allCount; d++)
                     {
-                        var t = await QClient.QueryAsync(data);
+                        var t = await QClient[6].QueryAsync(data);
                     }
                 });
                 var t8 = Task.Run(async () =>
                 {
                     for (var d = 0; d < allCount; d++)
                     {
-                        var t = await QClient.QueryAsync(data);
+                        var t = await QClient[7].QueryAsync(data);
                     }
                 });
                 var t9 = Task.Run(async () =>
                 {
                     for (var d = 0; d < allCount; d++)
                     {
-                        var t = await QClient.QueryAsync(data);
+                        var t = await QClient[8].QueryAsync(data);
                     }
                 });
                 var t10 = Task.Run(async () =>
                 {
                     for (var d = 0; d < allCount; d++)
                     {
-                        var t = await QClient.QueryAsync(data);
+                        var t = await QClient[9].QueryAsync(data);
                     }
                 });
                 Task.WaitAll(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10);

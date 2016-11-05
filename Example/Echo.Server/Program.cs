@@ -21,7 +21,7 @@ namespace Echo.Server
         static int count = 0;
         public override void OnReceived(ITcpSession session, IDynamicBuffer dataBuffer)
         {
-            Stream str = new MemoryStream();
+            //Stream str = new MemoryStream();
             // var result = new byte[dataBuffer.DataSize];
             //Buffer.BlockCopy(dataBuffer.Buffer, 0, result, 0, dataBuffer.DataSize);
             //session.SessionData.Set("islogin", true);//设置登录状态
