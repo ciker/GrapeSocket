@@ -62,5 +62,6 @@ namespace GrapeSocket.Server.Interface
         /// </summary>
         /// <returns></returns>
         ITcpPacketProtocol GetProtocol();
+        ILoger GetLoger();
     }
 }

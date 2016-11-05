@@ -70,5 +70,6 @@ namespace GrapeSocket.Client.Interface
         /// 断开连接通知
         /// </summary>
         void OnDisConnect(ITcpClientSession session);
+        ILoger GetLoger();
     }
 }

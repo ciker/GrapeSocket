@@ -10,19 +10,19 @@ using GrapeSocket.Server.Config;
 
 namespace GrapeSocket.Server
 {
-    public class TcpServer : ITcpServer
+    public abstract class TcpServer : ITcpServer
     {
         private ITcpSessionPool sessionPool;
         private IPEndPoint endPoint;
         public Socket ListenerSocket { get; set; }
         //构造函数
-        public TcpServer(TcpServerConfig config, ILoger loger)
+        public TcpServer(TcpServerConfig config)
         {
             this.Config = config;
             endPoint = new IPEndPoint(IPAddress.Parse(config.IP), config.Port);
             this.sessionPool = new TcpSessionPool();
             this.sessionPool.TcpServer = this;
-            this.Loger = loger;
+            this.Loger = GetLoger();
         }
         public TcpServerConfig Config { get; set; }
         public uint ServerId { get { return Config.ServerId; } }
@@ -119,7 +119,8 @@ namespace GrapeSocket.Server
         }
         public virtual ITcpPacketProtocol GetProtocol()
         {
-            return new TcpPacketProtocol();
+            return new TcpPacketProtocol(Config.NetByteOrder);
         }
+        public abstract ILoger GetLoger();
     }
 }

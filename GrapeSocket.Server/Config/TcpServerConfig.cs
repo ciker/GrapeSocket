@@ -23,6 +23,10 @@ namespace GrapeSocket.Server.Config
         /// </summary>
         public int Port { get; set; }
         /// <summary>
+        /// 是否把网络字节顺序转为本地字节顺序
+        /// </summary>
+        public bool NetByteOrder { get; set; }
+        /// <summary>
         /// 缓冲器数组大小
         /// </summary>
         public int BufferSize

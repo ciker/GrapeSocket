@@ -14,7 +14,7 @@ namespace Echo.Client
 {
     class MyClient : TcpClientSession
     {
-        public MyClient(EndPoint server, ILoger loger) : base(server, 1024, loger)
+        public MyClient(EndPoint server) : base(server, 1024)
         {
 
         }
@@ -22,12 +22,18 @@ namespace Echo.Client
         {
             Received(session, dataBuffer);
         }
+
+        public override ILoger GetLoger()
+        {
+            return new Loger();
+        }
+
         public event EventHandler<IDynamicBuffer> Received;
     }
     class QueryClient : TcpClientSession
     {
         ConcurrentQueue<TaskCompletionSource<byte[]>> taskQueue = new ConcurrentQueue<TaskCompletionSource<byte[]>>();
-        public QueryClient(EndPoint server, ILoger loger) : base(server, 1024, loger)
+        public QueryClient(EndPoint server) : base(server, 1024)
         {
 
         }
@@ -53,12 +59,16 @@ namespace Echo.Client
         {
             Console.WriteLine("与服务器断开连接");
         }
+
+        public override ILoger GetLoger()
+        {
+            return new Loger();
+        }
     }
     public class Program
     {
         static MyClient client;
         static QueryClient QClient;
-        static Loger loger;
         static int receiveCount = 0;
         static int allCount = 100000;
         static Stopwatch sb = new Stopwatch();
@@ -68,9 +78,8 @@ namespace Echo.Client
         }
         public static void AnswerTest()
         {
-            loger = new Loger();
             var endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8088);
-            QClient = new QueryClient(endPoint, loger);
+            QClient = new QueryClient(endPoint);
             QClient.PacketProtocol = new TcpClientPacketProtocol(1024, 1024 * 4);
             QClient.Connect();
             Console.WriteLine("连接服务器成功");
@@ -159,9 +168,8 @@ namespace Echo.Client
         }
         public static void CommonTest()
         {
-            loger = new Loger();
             var endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8088);
-            client = new MyClient(endPoint, loger);
+            client = new MyClient(endPoint);
             client.PacketProtocol = new TcpClientPacketProtocol(1024, 1024 * 4);
             client.Received += ReceiveCommond;
             client.Connect();

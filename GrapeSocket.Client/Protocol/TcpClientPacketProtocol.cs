@@ -33,9 +33,10 @@ namespace GrapeSocket.Client.Protocol
         private int noComplateOffset = 0;
         bool isSend = false;//发送状态
         private ConcurrentQueue<byte[]> sendDataQueue = new ConcurrentQueue<byte[]>();//指令发送队列
-        public TcpClientPacketProtocol(int bufferSize, int fixedBufferPoolSize)
+        public TcpClientPacketProtocol(int bufferSize, int fixedBufferPoolSize, bool netByteOrder = false)
         {
             SendBuffer = new FixedBuffer(bufferSize);
+            this.NetByteOrder = netByteOrder;
             ReceiveDataBuffer = new DynamicBuffer(bufferSize);
         }
         public bool ProcessReceiveBuffer(byte[] receiveBuffer, int offset, int count)
@@ -129,13 +130,13 @@ namespace GrapeSocket.Client.Protocol
                         var PacketAllLength = data.Length + intByteLength;
                         if (PacketAllLength <= surplus)
                         {
-                            SendBuffer.WriteInt(data.Length, false); //写入总大小
+                            SendBuffer.WriteInt(data.Length, NetByteOrder); //写入总大小
                             SendBuffer.WriteBuffer(data); //写入命令内容
                             surplus -= PacketAllLength;
                         }
                         else
                         {
-                            SendBuffer.WriteInt(data.Length, false); //写入总大小
+                            SendBuffer.WriteInt(data.Length, NetByteOrder); //写入总大小
                             surplus -= intByteLength; ;
                             if (surplus > 0)
                             {

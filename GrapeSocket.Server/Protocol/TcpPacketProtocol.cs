@@ -14,6 +14,10 @@ namespace GrapeSocket.Server.Protocol
 {
     public class TcpPacketProtocol : ITcpPacketProtocol
     {
+        public TcpPacketProtocol(bool netByteOrder = false)
+        {
+            this.NetByteOrder = netByteOrder;
+        }
         bool NetByteOrder = false;
         static int intByteLength = sizeof(int);
         private object clearLock = new object();
@@ -128,13 +132,13 @@ namespace GrapeSocket.Server.Protocol
                         var PacketAllLength = data.Length + intByteLength;
                         if (PacketAllLength <= surplus)
                         {
-                            SendBuffer.WriteInt(data.Length, false); //写入总大小
+                            SendBuffer.WriteInt(data.Length, NetByteOrder); //写入总大小
                             SendBuffer.WriteBuffer(data); //写入命令内容
                             surplus -= PacketAllLength;
                         }
                         else
                         {
-                            SendBuffer.WriteInt(data.Length, false); //写入总大小
+                            SendBuffer.WriteInt(data.Length, NetByteOrder); //写入总大小
                             surplus -= intByteLength; ;
                             if (surplus > 0)
                             {

@@ -9,21 +9,19 @@ using GrapeSocket.Client.Interface;
 
 namespace GrapeSocket.Client
 {
-    public class TcpClientSessionPool : ITcpClientSessionPool
+    public abstract class TcpClientSessionPool<T> : ITcpClientSessionPool where T:ITcpClientSession
     {
         private ConcurrentQueue<ITcpClientSession> pool = new ConcurrentQueue<ITcpClientSession>();
         private ConcurrentDictionary<long, ITcpClientSession> activeDict = new ConcurrentDictionary<long, ITcpClientSession>();
-        private int count = 0, bufferSize, maxSessions, fixedBufferPoolSize;
-        ILoger loger;
-        EndPoint remoteEndPoint;
+        protected int count = 0, bufferSize, maxSessions, fixedBufferPoolSize;
+        protected EndPoint remoteEndPoint;
         SessionId sessionId;
-        public TcpClientSessionPool(uint serverId,EndPoint remoteEndPoint, int bufferSize,int fixedBufferPoolSize, int maxSessions, ILoger loger)
+        public TcpClientSessionPool(uint serverId,EndPoint remoteEndPoint, int bufferSize,int fixedBufferPoolSize, int maxSessions)
         {
             this.bufferSize = bufferSize;
             this.maxSessions = maxSessions;
             this.remoteEndPoint = remoteEndPoint;
             this.fixedBufferPoolSize = fixedBufferPoolSize;
-            this.loger = loger;
             sessionId = new SessionId(serverId);
         }
         public int Count
@@ -57,7 +55,7 @@ namespace GrapeSocket.Client
             {
                 if (Interlocked.Increment(ref count) <= maxSessions)
                 {
-                    session = new TcpClientSession(remoteEndPoint,bufferSize,loger);
+                    session = CreateSession();
                     session.Pool = this;
                     session.SessionId = sessionId.NewId();
                     session.PacketProtocol = GetProtocal();
@@ -76,5 +74,6 @@ namespace GrapeSocket.Client
             if (activeDict.TryRemove(item.SessionId, out item))
                 pool.Enqueue(item);
         }
+        public abstract ITcpClientSession CreateSession();
     }
 }

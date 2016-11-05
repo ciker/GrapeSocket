@@ -6,22 +6,32 @@ using GrapeSocket.Server.Config;
 using GrapeSocket.Core.Interface;
 using GrapeSocket.Server.Interface;
 using GrapeSocket.Server;
+using System.IO;
 
 namespace Echo.Server
 {
     public class MyServer : TcpServer
     {
-        public MyServer(TcpServerConfig config, ILoger loger) : base(config, loger)
-        { }
+        ILoger logger;
+        public MyServer(TcpServerConfig config, ILoger loger) : base(config)
+        {
+            this.logger = loger;
+        }
         static byte[] data = Encoding.UTF8.GetBytes("测试数据服务器返回");
         static int count = 0;
         public override void OnReceived(ITcpSession session, IDynamicBuffer dataBuffer)
         {
+            Stream str = new MemoryStream();
             // var result = new byte[dataBuffer.DataSize];
             //Buffer.BlockCopy(dataBuffer.Buffer, 0, result, 0, dataBuffer.DataSize);
             //session.SessionData.Set("islogin", true);//设置登录状态
             //var txt= Encoding.UTF8.GetString(result);
             session.SendAsync(data);
+        }
+
+        public override ILoger GetLoger()
+        {
+            return logger;
         }
     }
     public class MyMonitor : TcpMonitor
@@ -70,12 +80,12 @@ namespace Echo.Server
             TcpServerConfig configOne = new TcpServerConfig { ServerId = 1, Name = "one", IP = "127.0.0.1", Port = 8088, BufferSize = 1024, MaxFixedBufferPoolSize = 1024 * 4, MaxConnections = 8000 };
             MyServer listener = new MyServer(configOne, loger);
             listener.Start();
-           // MonitorConfig monitorConfig = new MonitorConfig();
-           // monitorConfig.WorkDelayMilliseconds = 10000;
-           // monitorConfig.TimeoutMilliseconds = 10000;
-           // MyMonitor monitor = new MyMonitor(monitorConfig, 3000);
-           // monitor.AddServer(listener);
-           // monitor.Start();
+            // MonitorConfig monitorConfig = new MonitorConfig();
+            // monitorConfig.WorkDelayMilliseconds = 10000;
+            // monitorConfig.TimeoutMilliseconds = 10000;
+            // MyMonitor monitor = new MyMonitor(monitorConfig, 3000);
+            // monitor.AddServer(listener);
+            // monitor.Start();
             Console.WriteLine("服务器已启动");
             Console.ReadLine();
         }

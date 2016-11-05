@@ -9,15 +9,15 @@ using GrapeSocket.Client.Interface;
 
 namespace GrapeSocket.Client
 {
-    public class TcpClientSession : ITcpClientSession
+    public abstract class TcpClientSession : ITcpClientSession
     {
         EndPoint remoteEndPoint;
         byte[] receiveBuffer;
         ILoger loger;
         object closeLock = new object();
-        public TcpClientSession(EndPoint remoteEndPoint, int bufferSize, ILoger loger)
+        public TcpClientSession(EndPoint remoteEndPoint, int bufferSize)
         {
-            this.loger = loger;
+            this.loger = GetLoger();
             this.remoteEndPoint = remoteEndPoint;
             ReceiveEventArgs = new SocketAsyncEventArgs();
             ReceiveEventArgs.RemoteEndPoint = remoteEndPoint;
@@ -234,5 +234,6 @@ namespace GrapeSocket.Client
         {
 
         }
+        public abstract ILoger GetLoger();
     }
 }
